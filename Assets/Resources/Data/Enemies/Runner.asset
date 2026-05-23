@@ -1,0 +1,30 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f170fd09f581f174691052b08e047161, type: 3}
+  m_Name: Runner
+  m_EditorClassIdentifier: 
+  enemyName: Runner
+  enemyType: 1
+  prefab: {fileID: 985371304308088772, guid: b568021f831691a44b40a82d80106324, type: 3}
+  baseMaxHp: 60
+  baseMoveSpeed: 6
+  baseDamage: 15
+  attackRange: 2
+  attackCooldown: 1.5
+  chaseRange: 10
+  patrolRadius: 5
+  expReward: 15
+  hpGrowthRate: 0.15
+  damageGrowthRate: 0.1
+  speedGrowthRate: 0.03
+  firstWave: 6
+  spawnWeight: 0.2
