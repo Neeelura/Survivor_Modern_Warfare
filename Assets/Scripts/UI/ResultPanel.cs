@@ -46,6 +46,8 @@ public class ResultPanel : BasePanel
     /// </summary>
     protected override void OnShow()
     {
+        Time.timeScale = 0f;
+
         int waves = WaveManager.Instance != null ? WaveManager.Instance.CurrentWave : 0;
         int kills = WaveManager.Instance != null ? WaveManager.Instance.TotalKills : 0;
         int level = PlayerLevel.Instance.level;
