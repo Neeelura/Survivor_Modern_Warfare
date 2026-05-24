@@ -1,5 +1,5 @@
 /// <summary>
-/// 敌人的追击状态 当玩家进入敌人的追击范围时，敌人会切换到这个状态，开始追击玩家。
+/// 敌人的追击状态，生成后直接锁定玩家并持续追击，永不返回巡逻。
 /// </summary>
 public class EnemyState_Chase : EnemyState_Base
 {
@@ -15,32 +15,14 @@ public class EnemyState_Chase : EnemyState_Base
     {
         base.OnUpdate();
 
-        // 与出生点的距离
-        float distToSpawnSqr = (enemy.transform.position - enemy.spawnPoint).sqrMagnitude;
-
-        // 超出追击范围，返回出生点
-        if (nowTargetSqrDist > enemy.chaseRangeSqr)
+        // 进入攻击范围则切换攻击
+        if (nowTargetSqrDist <= enemy.attackRangeSqr)
         {
-            if (distToSpawnSqr > 0.5f)
-            {
-                enemy.DoMove(enemy.spawnPoint);
-            }
-            else
-            {
-                stateMachine.ChangeState(enemy.patrolState);
-            }
+            stateMachine.ChangeState(enemy.attackState);
             return;
         }
 
-        // 追击玩家
-        if (nowTargetSqrDist > enemy.attackRangeSqr)
-        {
-            enemy.DoMove(enemy.player.transform.position);
-        }
-        // 如果进入攻击范围，切换到攻击状态
-        else
-        {
-            stateMachine.ChangeState(enemy.attackState);
-        }
+        // 始终追击玩家
+        enemy.DoMove(enemy.player.transform.position);
     }
 }

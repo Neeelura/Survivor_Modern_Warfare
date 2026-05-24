@@ -5,11 +5,9 @@ public class EnemyController : MonoBehaviour, IDamageable
 {
     public int maxHp;
     private int currentHp;
-    public float chaseRange;  // 追逐范围
     public float attackRange;  // 攻击范围
     public int damage;
     public float attackCooldown;
-    public float patrolRadius; // 巡逻半径
 
     // DOT 灼烧状态（由 M2 火焰喷射器等武器附加）
     // DOT 造成伤害时不会触发 Hit 受击硬直，避免火焰持续造成硬直锁死
@@ -25,12 +23,10 @@ public class EnemyController : MonoBehaviour, IDamageable
     public NavMeshAgent agent { get; private set; }
 
     // 预缓存距离平方
-    public float chaseRangeSqr { get; private set; }
     public float attackRangeSqr { get; private set; }
 
     // FSM 状态
     public StateMachine FSM { get; private set; }
-    public EnemyState_Patrol patrolState { get; private set; }
     public EnemyState_Chase chaseState { get; private set; }
     public EnemyState_Attack attackState { get; private set; }
     public EnemyState_Hit hitState { get; private set; }
@@ -43,7 +39,6 @@ public class EnemyController : MonoBehaviour, IDamageable
         animController = GetComponentInChildren<EnemyAnimController>();
 
         FSM = new StateMachine();
-        patrolState = new EnemyState_Patrol(this, FSM);
         chaseState = new EnemyState_Chase(this, FSM);
         attackState = new EnemyState_Attack(this, FSM);
         hitState = new EnemyState_Hit(this, FSM);
@@ -57,7 +52,7 @@ public class EnemyController : MonoBehaviour, IDamageable
 
     void Start()
     {
-        FSM.ChangeState(patrolState);
+        FSM.ChangeState(chaseState);
     }
 
     void Update()
@@ -104,10 +99,8 @@ public class EnemyController : MonoBehaviour, IDamageable
         maxHp = data.GetScaledHp(wave);
         currentHp = maxHp;
         damage = data.GetScaledDamage(wave);
-        chaseRange = data.chaseRange;
         attackRange = data.attackRange;
         attackCooldown = data.attackCooldown;
-        patrolRadius = data.patrolRadius;
 
         // 配置 NavMeshAgent
         if (agent != null)
@@ -117,8 +110,7 @@ public class EnemyController : MonoBehaviour, IDamageable
             agent.Warp(transform.position);
         }
 
-        // 重新预计算距离平方（用于 FSM 状态判断）
-        chaseRangeSqr = chaseRange * chaseRange;
+        // 预计算攻击范围距离平方（用于 FSM 状态判断）
         attackRangeSqr = attackRange * attackRange;
 
         // 清空 DOT 状态（防止对象池复用残留）
@@ -130,10 +122,10 @@ public class EnemyController : MonoBehaviour, IDamageable
         // 确保碰撞体开启
         GetComponent<Collider>().enabled = true;
 
-        // 切换到巡逻状态
-        if (FSM != null && patrolState != null)
+        // 生成后直接追击玩家
+        if (FSM != null && chaseState != null)
         {
-            FSM.ChangeState(patrolState);
+            FSM.ChangeState(chaseState);
         }
     }
 
