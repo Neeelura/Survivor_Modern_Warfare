@@ -56,14 +56,14 @@ public class ResultPanel : BasePanel
         txtKills.text = $"击杀数: {kills}";
         txtLevel.text = $"最高等级: {level}";
 
-        int bestWaves = PlayerPrefs.GetInt("BestWave", 0);
-        int bestKills = PlayerPrefs.GetInt("BestKills", 0);
+        SaveData save = SaveSystem.Load();
 
-        txtBestWaves.text = $"最佳波次: {bestWaves}";
-        txtBestKills.text = $"最佳击杀: {bestKills}";
+        txtBestWaves.text = $"最佳波次: {save.bestWave}";
+        txtBestKills.text = $"最佳击杀: {save.bestKills}";
 
-        if (waves > bestWaves) PlayerPrefs.SetInt("BestWave", waves);
-        if (kills > bestKills) PlayerPrefs.SetInt("BestKills", kills);
-        PlayerPrefs.Save();
+        if (waves > save.bestWave) save.bestWave = waves;
+        if (kills > save.bestKills) save.bestKills = kills;
+
+        SaveSystem.Save(save);
     }
 }
