@@ -67,7 +67,7 @@ public class PlayerHUDPanel : BasePanel
             UIManager.Instance.ShowPanel<PauseMenuPanel>();
         }
 
-        if (Input.GetKeyDown(KeyCode.Tab))
+        if (!UIManager.Instance.isPaused && Input.GetKeyDown(KeyCode.Tab))
         {
             ToggleAttributePanel();
         }

@@ -38,6 +38,7 @@ public class PauseMenuPanel : BasePanel
     protected override void OnShow()
     {
         base.OnShow();
+        UIManager.Instance.isPaused = true;
         Time.timeScale = 0f; // 暂停游戏
     }
 
@@ -45,6 +46,7 @@ public class PauseMenuPanel : BasePanel
     {
         base.OnHide();
         Time.timeScale = 1f; // 恢复游戏
+        UIManager.Instance.isPaused = false;
     }
 
     private void Update()

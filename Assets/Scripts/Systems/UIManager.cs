@@ -13,6 +13,8 @@ public class UIManager
     private Dictionary<string, BasePanel> panelDic = new Dictionary<string, BasePanel>();
     private Transform canvasTrans;
 
+    public bool isPaused = false;
+
     private UIManager()
     {
         GameObject canvas = Object.Instantiate(Resources.Load<GameObject>("Prefabs/UI/Canvas"));
