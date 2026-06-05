@@ -35,14 +35,23 @@ public class PauseMenuPanel : BasePanel
         });
     }
 
+    protected override void OnShow()
+    {
+        base.OnShow();
+        Time.timeScale = 0f; // 暂停游戏
+    }
+
+    protected override void OnHide()
+    {
+        base.OnHide();
+        Time.timeScale = 1f; // 恢复游戏
+    }
+
     private void Update()
     {
         if (Input.GetKeyDown(KeyCode.Escape))
         {
-            if (gameObject.activeSelf)
-                UIManager.Instance.HidePanel<PauseMenuPanel>();
-            else
-                UIManager.Instance.ShowPanel<PauseMenuPanel>();
+            UIManager.Instance.HidePanel<PauseMenuPanel>();
         }
     }
 }

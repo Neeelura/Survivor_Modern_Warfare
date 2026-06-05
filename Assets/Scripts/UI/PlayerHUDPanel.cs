@@ -59,6 +59,14 @@ public class PlayerHUDPanel : BasePanel
         EventCenter.RemoveListener("EnemyDied", OnEnemyDied);
     }
 
+    private void Update()
+    {
+        if (Input.GetKeyDown(KeyCode.Escape))
+        {
+            UIManager.Instance.ShowPanel<PauseMenuPanel>();
+        }
+    }
+
     private void OnHpChanged(int currentHp)
     {
         imgHp.rectTransform.sizeDelta = new Vector2((float)currentHp / 100 * 800f, imgHp.rectTransform.sizeDelta.y);
