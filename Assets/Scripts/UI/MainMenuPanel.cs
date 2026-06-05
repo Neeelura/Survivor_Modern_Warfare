@@ -23,7 +23,10 @@ public class MainMenuPanel : BasePanel
 
         btnContinue.onClick.AddListener(() =>
         {
-            UIManager.Instance.ShowPanel<PlayerHUDPanel>();
+            SaveData data = SaveSystem.Load();
+            if (!data.CanContinue) return;
+
+            SaveSystem.IsContinueMode = true;
             SceneManager.LoadScene("GameScene");
             UIManager.Instance.HidePanel<MainMenuPanel>();
         });

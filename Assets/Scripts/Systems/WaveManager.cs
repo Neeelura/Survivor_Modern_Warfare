@@ -46,10 +46,19 @@ public class WaveManager : MonoBehaviour
         // 监听敌人死亡事件，用于追踪存活数量
         EventCenter.AddListener("EnemyDied", OnEnemyDied);
 
-        // 初始化 UI 并启动游戏
+        // 初始化 UI
         UIManager.Instance.ShowPanel<PlayerHUDPanel>();
 
-        StartGame();
+        // 检查是否为"继续游戏"模式
+        if (SaveSystem.IsContinueMode)
+        {
+            SaveSystem.IsContinueMode = false;
+            ContinueGame();
+        }
+        else
+        {
+            StartGame();
+        }
     }
 
     private void OnDestroy()
@@ -60,8 +69,7 @@ public class WaveManager : MonoBehaviour
 
 
     /// <summary>
-    /// 开始游戏，启动第一波
-    /// 供 MainMenuPanel / GameManager 调用（Phase 6）
+    /// 开始新游戏，启动第一波
     /// </summary>
     public void StartGame()
     {
@@ -70,19 +78,55 @@ public class WaveManager : MonoBehaviour
         IsGameOver = false;
         CurrentWave = 0;
         TotalKills = 0;
-        StartCoroutine(WaveLoop());
+        StartCoroutine(WaveLoop(1));
+    }
+
+    /// <summary>
+    /// 从存档恢复并继续游戏
+    /// 从上次保存的波次的下一波开始
+    /// </summary>
+    public void ContinueGame()
+    {
+        if (IsWaveActive) return;
+
+        SaveData data = SaveSystem.Load();
+        if (!data.CanContinue) return;
+
+        // 恢复玩家等级与经验
+        PlayerLevel.Instance.level = data.playerLevel;
+        PlayerLevel.Instance.currentExp = data.playerExp;
+        PlayerLevel.Instance.expToNextLevel = PlayerLevel.Instance.CalculateExpRequired(data.playerLevel);
+
+        // 恢复武器槽位
+        if (WeaponManager.Instance != null)
+        {
+            WeaponManager.Instance.RestoreSlots(data.weaponSlots);
+        }
+
+        // 重算属性
+        PlayerStats.Instance.Init();
+        PlayerStats.Instance.Recalculate();
+
+        IsGameOver = false;
+        CurrentWave = data.currentWave;
+        TotalKills = data.totalKills;
+
+        Debug.Log($"[WaveManager] 继续游戏：从波次 {data.currentWave + 1} 开始，等级 Lv.{data.playerLevel}，武器 {data.weaponSlots.Count} 把");
+
+        StartCoroutine(WaveLoop(data.currentWave + 1));
     }
 
     /// <summary>
     /// 波次循环协程
     /// 循环：等待 → 开始波次 → 等待敌人全部死亡 → 下一波
     /// </summary>
-    private IEnumerator WaveLoop()
+    private IEnumerator WaveLoop(int startWave)
     {
-        // 第一波之前的准备时间
-        yield return new WaitForSeconds(startDelay);
+        // 新游戏第一波之前有准备时间
+        if (startWave == 1)
+            yield return new WaitForSeconds(startDelay);
 
-        for (int wave = 1; wave <= totalWaves; wave++)
+        for (int wave = startWave; wave <= totalWaves; wave++)
         {
             if (IsGameOver) yield break;
 
@@ -111,13 +155,17 @@ public class WaveManager : MonoBehaviour
 
             Debug.Log($"[WaveManager] 波次 {wave}/{totalWaves} 结束");
 
-            // 广播波次结束事件（Phase 6 UI / Phase 8 存档）
+            // 广播波次结束事件
             EventCenter.Broadcast<int>("WaveEnd", wave);
+
+            // 每波结束自动存档
+            SaveSystem.SaveRuntimeState();
 
             // 最后一波结束后不再等待
             if (wave >= totalWaves)
             {
                 Debug.Log("[WaveManager] 全部波次通关！");
+                SaveSystem.ClearRuntimeState();
                 EventCenter.Broadcast("GameWin");
                 UIManager.Instance.ShowPanel<ResultPanel>();
                 yield break;
@@ -156,6 +204,8 @@ public class WaveManager : MonoBehaviour
     {
         IsGameOver = true;
         IsWaveActive = false;
+
+        SaveSystem.ClearRuntimeState();
 
         // 清除所有存活敌人
         EnemyController[] enemies = Object.FindObjectsOfType<EnemyController>();

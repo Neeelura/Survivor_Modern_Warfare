@@ -30,6 +30,7 @@ public class PauseMenuPanel : BasePanel
         btnMainMenu.onClick.AddListener(() =>
         {
             Time.timeScale = 1f;
+            SaveSystem.SaveRuntimeState();
             SceneManager.LoadScene("BeginScene");
         });
     }

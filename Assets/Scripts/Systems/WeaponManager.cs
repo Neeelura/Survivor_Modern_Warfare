@@ -435,6 +435,59 @@ public class WeaponManager : MonoBehaviour
     }
 
     /// <summary>
+    /// 从存档恢复武器槽位（"继续游戏"专用）
+    /// 遍历 WeaponSlotData 列表，通过 weaponName 反查 WeaponData SO 并装备
+    /// </summary>
+    public void RestoreSlots(System.Collections.Generic.List<WeaponSlotData> list)
+    {
+        // 清理现有槽位与模型
+        for (int i = 0; i < weaponModelInstances.Count; i++)
+        {
+            if (weaponModelInstances[i] != null)
+                Destroy(weaponModelInstances[i]);
+        }
+        weaponModelInstances.Clear();
+        slots.Clear();
+
+        if (list == null || list.Count == 0) return;
+
+        WeaponData[] allWeapons = Resources.LoadAll<WeaponData>("Data/Skills");
+
+        for (int i = 0; i < list.Count && slots.Count < MAX_SLOTS; i++)
+        {
+            WeaponSlotData slotData = list[i];
+            if (string.IsNullOrEmpty(slotData.weaponName)) continue;
+
+            WeaponData weapon = null;
+            for (int j = 0; j < allWeapons.Length; j++)
+            {
+                if (allWeapons[j].weaponName == slotData.weaponName)
+                {
+                    weapon = allWeapons[j];
+                    break;
+                }
+            }
+
+            if (weapon == null)
+            {
+                Debug.LogWarning($"[WeaponManager] RestoreSlots: 未找到武器 {slotData.weaponName}");
+                continue;
+            }
+
+            WeaponSlot newSlot = new WeaponSlot
+            {
+                weaponData = weapon,
+                level = Mathf.Clamp(slotData.level, 1, 5),
+                cooldownTimer = 0f,
+            };
+            slots.Add(newSlot);
+            RefreshWeaponModel(slots.Count - 1);
+        }
+
+        Debug.Log($"[WeaponManager] 从存档恢复了 {slots.Count} 把武器");
+    }
+
+    /// <summary>
     /// 升级指定槽位的武器
     /// </summary>
     /// <param name="slotIndex">槽位索引（0~3）</param>
