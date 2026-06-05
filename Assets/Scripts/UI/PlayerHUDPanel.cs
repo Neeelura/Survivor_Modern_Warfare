@@ -46,6 +46,7 @@ public class PlayerHUDPanel : BasePanel
         txtWave.text = $"波次 1 / 25";
         txtKillCount.text = $"击杀 0";
 
+        ToggleAttributePanel(); // 默认隐藏属性面板
         RefreshWeaponSlots();
         RefreshAttributes();
     }
@@ -64,6 +65,11 @@ public class PlayerHUDPanel : BasePanel
         if (Input.GetKeyDown(KeyCode.Escape))
         {
             UIManager.Instance.ShowPanel<PauseMenuPanel>();
+        }
+
+        if (Input.GetKeyDown(KeyCode.Tab))
+        {
+            ToggleAttributePanel();
         }
     }
 
